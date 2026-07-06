@@ -66,7 +66,7 @@ const importText = ref('')
 const importLoading = ref(false)
 
 /** ===== 进度弹窗状态 ===== */
-const progressVisible = ref(true)
+const progressVisible = ref(false)
 const progressTitle = ref('AI 正在为您创建用印流程...')
 const progressSubtitle = ref('预计需要等待 1~2 分钟，请稍后')
 const progressSteps = ref<StepItem[]>([
