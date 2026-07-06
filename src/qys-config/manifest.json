@@ -1,0 +1,42 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-07-02T09:30:00Z",
+  "description": "用印流程配置前端配置清单，由 qys-prompt-sync 技能从文档2/文档4派生。前端读取此文件自动完成配置项渲染，新增配置项只需更新此文件。",
+  "configKeys": [
+    { "key": "SCHEDULE_SEND", "label": "文件定时发起", "category": "time", "defaultValue": { "enable": false }, "formType": "simple-switch" },
+    { "key": "SIGN_EXPIRE_DATE", "label": "签署截止日期", "category": "time", "defaultValue": { "expireKind": "DEFAULT", "daysType": "ASSIGN_DAYS", "days": 0, "allowOperatorChange": false }, "formType": "sign-expire-date" },
+    { "key": "END_TIME", "label": "文件到期日期", "category": "time", "defaultValue": { "enableEndTime": false, "mustFill": false }, "formType": "simple-switch" },
+    { "key": "SPACE_FILE_CHECK", "label": "空白页 / 空白处检测", "category": "time", "defaultValue": { "checkKind": "SYSTEM", "enableCheckBlankPage": false, "allowSendOnBlankPage": false, "allowAppointedSignOnBlankPage": false, "enableCheckBlankSpace": false, "allowAppointedSignOnBlankSpace": false }, "formType": "space-file-check" },
+    { "key": "SHARE_FILE", "label": "文件分享", "category": "time", "defaultValue": { "allowShareFile": false }, "formType": "simple-switch" },
+    { "key": "MERGE_FILE_SIGN", "label": "文件合并签署", "category": "time", "defaultValue": { "enableMergeFile": false }, "formType": "simple-switch" },
+    { "key": "TEMPLATE_BINDING", "label": "绑定模板", "category": "time", "defaultValue": { "templateIds": [] }, "formType": "template-binding" },
+    { "key": "SIMPLE_SIGN_MODE", "label": "极简签署模式", "category": "security", "defaultValue": { "enableSimpleSignMode": false }, "formType": "simple-switch" },
+    { "key": "PRIVATE_SEND_CLOUD_SIGN", "label": "私发公签", "category": "security", "defaultValue": { "enableCloudSign": false }, "formType": "simple-switch" },
+    { "key": "ALLOW_TERMINATE_PART", "label": "允许作废部分签署文档", "category": "security", "defaultValue": { "allowTerminatePart": false }, "formType": "simple-switch" },
+    { "key": "SIGN_POSITION_OVERLAP", "label": "签章位置防重叠", "category": "security", "defaultValue": { "notAllowSignPositionOverlap": false }, "formType": "simple-switch" },
+    { "key": "SIGN_REGION", "label": "指定签署区域", "category": "security", "defaultValue": { "allowSpecifySignRegion": false }, "formType": "simple-switch" },
+    { "key": "TAMPER_PROOF_SIGN", "label": "防篡改保护证书", "category": "security", "defaultValue": { "enableTamperProofSign": false }, "formType": "simple-switch" },
+    { "key": "PDF_CONVERT_IMAGE", "label": "文件转图片防扣章", "category": "security", "defaultValue": { "enablePdfConvertImage": false }, "formType": "simple-switch" },
+    { "key": "NEED_HANDWRITE_SEAL", "label": "每次签署均需手写签名", "category": "security", "defaultValue": { "enableHandwriteSeal": false, "flowSignatories": [] }, "formType": "flow-signatory-config" },
+    { "key": "PERSON_SEAL_CHECK", "label": "个人签名笔迹校验", "category": "security", "defaultValue": { "enablePersonSealCheck": false, "flowSignatories": [] }, "formType": "flow-signatory-config" },
+    { "key": "SIGN_RECORD_GPS", "label": "签署时记录 GPS 定位", "category": "security", "defaultValue": { "enableSignRecordGps": false, "person": { "enable": false, "mustProvideGps": false }, "department": { "enable": false, "mustProvideGps": false }, "sender": { "enable": false, "mustProvideGps": false } }, "formType": "sign-record-gps" },
+    { "key": "PURPOSE_STAMP", "label": "用途章", "category": "security", "defaultValue": { "enablePurposeStamp": false }, "formType": "simple-switch" },
+    { "key": "ATTACHMENT_ID_CARD", "label": "附件证件照校验", "category": "security", "defaultValue": { "flowSignatories": [] }, "formType": "attachment-id-card" },
+    { "key": "TURN_TODO", "label": "外部经办人转办盖章人", "category": "convenient", "defaultValue": { "allowTurnTodo": false, "flowSignatories": [] }, "formType": "flow-signatory-config" },
+    { "key": "SWEEP_CODE_SIGN", "label": "扫码签署", "category": "convenient", "defaultValue": { "personSweepCodeSign": false, "departmentSweepCodeSign": false, "flowSignatories": [] }, "formType": "flow-signatory-config" },
+    { "key": "FACE_SIGN", "label": "当面签", "category": "convenient", "defaultValue": { "enableFaceSign": false, "flowSignatories": [] }, "formType": "flow-signatory-config" },
+    { "key": "FDA_SIGN", "label": "多签名结构体支持", "category": "convenient", "defaultValue": { "enableFda": false, "fdaSignStyle": "CN_FDA_LEFT_RIGHT", "flowSignatories": [] }, "formType": "flow-signatory-config" }
+  ],
+  "enums": [
+    { "name": "categoryType", "label": "用印流程类型", "options": [ { "value": "ELECTRONIC", "label": "PDF 电子签约" }, { "value": "ELECTRONIC_OFD", "label": "OFD 电子签约" } ] },
+    { "name": "flowMode", "label": "流程模式", "options": [ { "value": "NON_DEFINE", "label": "自定义" }, { "value": "DEFINE", "label": "预设" }, { "value": "DEFINE_CHANGE", "label": "预设允许修改签署方" } ] },
+    { "name": "receiveType", "label": "接收顺序", "options": [ { "value": "SIMUL", "label": "同时接收" }, { "value": "SEQ", "label": "顺序接收" } ] },
+    { "name": "flowSignatoryKind", "label": "签署方类型", "options": [ { "value": "SENDER", "label": "发起主体" }, { "value": "OUTER", "label": "外部组织接收方" }, { "value": "PERSON", "label": "个人接收方" } ] },
+    { "name": "flowActionKind", "label": "签署节点类型", "options": [ { "value": "CORPORATE_NODE", "label": "组织签章节点" }, { "value": "LP_NODE", "label": "法人签字节点" }, { "value": "AUDIT_NODE", "label": "审批节点" }, { "value": "PERSONAL_NODE", "label": "个人签字节点" }, { "value": "OPERATOR_NODE", "label": "经办人签字节点" } ] },
+    { "name": "expireKind", "label": "截止日期类型", "options": [ { "value": "DEFAULT", "label": "默认" }, { "value": "CUSTOM", "label": "自定义" } ] },
+    { "name": "daysType", "label": "天数类型", "options": [ { "value": "ASSIGN_DAYS", "label": "指定天数" }, { "value": "DAY_OF_SEND", "label": "签约发起当天" } ] },
+    { "name": "checkKind", "label": "空白检测要求", "options": [ { "value": "SYSTEM", "label": "系统默认" }, { "value": "CUSTOM", "label": "自定义" } ] },
+    { "name": "checkMode", "label": "附件校验模式", "options": [ { "value": "NONE", "label": "不校验" }, { "value": "IDCARD_FACE", "label": "身份证人像面" }, { "value": "IDCARD_NATIONAL", "label": "身份证国徽面" } ] },
+    { "name": "fdaSignStyle", "label": "FDA 签名样式", "options": [ { "value": "EN_FDA_LEFT_RIGHT", "label": "英文左右" }, { "value": "EN_FDA_UP_DOWN", "label": "英文上下" }, { "value": "CN_FDA_LEFT_RIGHT", "label": "中文左右" }, { "value": "CN_FDA_UP_DOWN", "label": "中文上下" } ] }
+  ]
+}
