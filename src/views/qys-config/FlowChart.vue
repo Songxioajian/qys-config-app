@@ -63,9 +63,9 @@ const tabs = computed(() => {
 
 /** 签署方颜色 */
 const signColors = [
-  { bg: '#FDF2F0', border: '#F5C6C0', text: '#C45A3E' },
-  { bg: '#F5F3FE', border: '#D8D1F5', text: '#6B5DD3' },
-  { bg: '#EDF6DE', border: '#B8D992', text: '#4A8014' },
+  { bg: '#FDF2F0', border: '#F5C6C0', color: '#C45A3E' },
+  { bg: '#F5F3FE', border: '#D8D1F5', color: '#6B5DD3' },
+  { bg: '#EDF6DE', border: '#B8D992', color: '#4A8014' },
 ]
 
 /** 流程节点 */
@@ -124,7 +124,6 @@ const hasHidden = computed(() => totalCount.value > enabledCount.value)
 
 const enabledCount = computed(() => enabledConfigs.value.length)
 const totalCount = computed(() => props.json.configs.length)
-const progressPct = computed(() => totalCount.value ? Math.round(enabledCount.value / totalCount.value * 100) : 0)
 
 function formatValue(cfg: ConfigItem): string {
   if (!cfg.enable) return '未开启'

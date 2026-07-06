@@ -31,7 +31,7 @@ import { executeFlow } from '../qys-config/api'
 import { buildInitiateFileUrl } from '../qys-config/realApi'
 import { parseImportedJson } from '../qys-config/importJson'
 import { CONFIG_KEY_LABEL } from '../qys-config/constants'
-import type { StepItem } from '../qys-config/ProgressDialog'
+import type { StepItem } from '../qys-config/ProgressDialog.vue'
 import ProgressDialog from '../qys-config/ProgressDialog.vue'
 
 /**
