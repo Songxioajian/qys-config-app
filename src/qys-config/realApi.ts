@@ -34,7 +34,7 @@ const RETRY_BACKOFF_BASE = 1000
 //  ★ 真实接口配置：直接改这里，无需 .env
 // ============================================================
 /** 接口 baseURL（末尾不要加 /） */
-const API_BASE_URL = 'https://prod-app248.qiyuesuo.net'
+const API_BASE_URL = 'https://app74.qiyuesuo.cn'
 /** 请求超时（毫秒） */
 const API_TIMEOUT = 15000
 // ============================================================
