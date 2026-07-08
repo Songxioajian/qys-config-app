@@ -202,17 +202,17 @@ export function decomposeBusinessJson(
  * @param apiInvoke 单次接口调用函数（需内部处理重试）
  * @param onStepStart 步骤开始回调
  * @param onStepSuccess 步骤成功回调
- * @param onStepError 步骤失败回调
+ * @param onStepError 步骤失败回调；fatal=true 表示致命错误（流程终止），false 表示非致命（演示模式下继续）
  */
 export async function runFlow(
   json: BusinessJson,
   apiInvoke: (req: CategoryRequest) => Promise<ApiResponse>,
   options?: {
-    /** 演示模式：创建流程 + 修改签署方接口成功后，其余配置接口视为成功（不实际调用） */
+    /** 演示模式：创建流程 + 修改签署方接口成功后，其余配置接口正常调用，单个失败不阻断后续 */
     demoMode?: boolean
     onStepStart?: (step: number, key: string, req: CategoryRequest) => void
     onStepSuccess?: (step: number, key: string, resp: ApiResponse) => void
-    onStepError?: (step: number, key: string, resp: ApiResponse | null, err: Error | null) => void
+    onStepError?: (step: number, key: string, resp: ApiResponse | null, err: Error | null, fatal: boolean) => void
   },
 ): Promise<FlowResult> {
   /** 演示模式开关 */
@@ -232,7 +232,7 @@ export async function runFlow(
       message: err?.message || '网络异常',
       isNetwork: true,
     }
-    options?.onStepError?.(1, 'CREATE_CATEGORY', null, err)
+    options?.onStepError?.(1, 'CREATE_CATEGORY', null, err, true)
     return { ok: false, error: flowErr }
   }
 
@@ -245,7 +245,7 @@ export async function runFlow(
       message: step1Resp.message,
       isNetwork: false,
     }
-    options?.onStepError?.(1, 'CREATE_CATEGORY', step1Resp, null)
+    options?.onStepError?.(1, 'CREATE_CATEGORY', step1Resp, null, true)
     return { ok: false, error: flowErr }
   }
 
@@ -263,7 +263,7 @@ export async function runFlow(
       message: '响应 result.id 不是合法 ID（应为整数或数字字符串）',
       isNetwork: false,
     }
-    options?.onStepError?.(1, 'CREATE_CATEGORY', step1Resp, null)
+    options?.onStepError?.(1, 'CREATE_CATEGORY', step1Resp, null, true)
     return { ok: false, error: flowErr }
   }
   options?.onStepSuccess?.(1, 'CREATE_CATEGORY', step1Resp)
@@ -283,7 +283,7 @@ export async function runFlow(
         message: err?.message || '网络异常',
         isNetwork: true,
       }
-      options?.onStepError?.(2, 'SIGNATORY', null, err)
+      options?.onStepError?.(2, 'SIGNATORY', null, err, true)
       return { ok: false, categoryId, error: flowErr }
     }
     if (step2Resp.code !== 0) {
@@ -294,15 +294,18 @@ export async function runFlow(
         message: step2Resp.message,
         isNetwork: false,
       }
-      options?.onStepError?.(2, 'SIGNATORY', step2Resp, null)
+      options?.onStepError?.(2, 'SIGNATORY', step2Resp, null, true)
       return { ok: false, categoryId, error: flowErr }
     }
     options?.onStepSuccess?.(2, 'SIGNATORY', step2Resp)
     personalSignatoryFlag = extractPersonalSignatoryFlag(step2Resp)
   }
 
-  // ===== 步骤3+：configs 遍历 =====
+  // ===== 步骤3+：configs 遍历（两种模式都真实调用，演示模式失败不阻断） =====
   let currentStep = step2Req ? 3 : 2
+  /** 演示模式下收集失败配置 key */
+  const failedConfigs: string[] = []
+
   for (const item of json.configs) {
     if (!item.enable) continue
 
@@ -313,19 +316,7 @@ export async function runFlow(
     const req = buildConfigRequest(json.meta, categoryId, reqItem)
     options?.onStepStart?.(currentStep, item.key, req)
 
-    /**
-     * ★ 演示模式：
-     *   CREATE_CATEGORY + SIGNATORY 已成功 → 其余配置接口直接视为成功，
-     *   不实际调用 API，模拟成功响应以展示完整进度体验。
-     */
-    if (demoMode) {
-      await new Promise((resolve) => setTimeout(resolve, 300)) // 微小延迟保证 UI 刷新
-      options?.onStepSuccess?.(currentStep, item.key, { code: 0, message: '演示模式自动成功', result: {} })
-      currentStep++
-      continue
-    }
-
-    // 正常模式：实际调用接口
+    // 两种模式均真实调用接口
     let resp: ApiResponse
     try {
       resp = await apiInvoke(req)
@@ -336,7 +327,14 @@ export async function runFlow(
         message: err?.message || '网络异常',
         isNetwork: true,
       }
-      options?.onStepError?.(currentStep, item.key, null, err)
+      if (demoMode) {
+        // 演示模式：记录失败并继续，不阻断后续配置
+        failedConfigs.push(item.key)
+        options?.onStepError?.(currentStep, item.key, null, err, false)
+        currentStep++
+        continue
+      }
+      options?.onStepError?.(currentStep, item.key, null, err, true)
       return { ok: false, categoryId, error: flowErr }
     }
     if (resp.code !== 0) {
@@ -347,12 +345,19 @@ export async function runFlow(
         message: resp.message,
         isNetwork: false,
       }
-      options?.onStepError?.(currentStep, item.key, resp, null)
+      if (demoMode) {
+        // 演示模式：业务失败也记录并继续
+        failedConfigs.push(item.key)
+        options?.onStepError?.(currentStep, item.key, resp, null, false)
+        currentStep++
+        continue
+      }
+      options?.onStepError?.(currentStep, item.key, resp, null, true)
       return { ok: false, categoryId, error: flowErr }
     }
     options?.onStepSuccess?.(currentStep, item.key, resp)
     currentStep++
   }
 
-  return { ok: true, categoryId }
+  return { ok: true, categoryId, failedConfigs }
 }

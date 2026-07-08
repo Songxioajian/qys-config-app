@@ -20,11 +20,11 @@ import { realInvokeWithRetry } from './realApi'
 export async function executeFlow(
   json: BusinessJson,
   options?: {
-    /** 演示模式：创建流程 + 签署方成功后，其余配置接口视为成功 */
+    /** 演示模式：创建流程 + 签署方成功后，其余配置接口正常调用，单个失败不阻断后续 */
     demoMode?: boolean
     onStepStart?: (step: number, key: string, req: CategoryRequest) => void
     onStepSuccess?: (step: number, key: string, resp: ApiResponse) => void
-    onStepError?: (step: number, key: string, resp: ApiResponse | null, err: Error | null) => void
+    onStepError?: (step: number, key: string, resp: ApiResponse | null, err: Error | null, fatal: boolean) => void
   },
 ): Promise<FlowResult> {
   return runFlow(json, realInvokeWithRetry, options)

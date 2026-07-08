@@ -25,6 +25,8 @@ const props = defineProps<{
   subtitle: string
   steps: StepItem[]
   currentStep: number
+  /** 失败的步骤序号（1-based，与回调 step 一致），用于演示模式容错展示 */
+  errorSteps?: number[]
 }>()
 
 /** 进度百分比（0~100） */
@@ -40,8 +42,10 @@ const dashOffset = computed(() => {
   return circumference - (circumference * percent.value) / 100
 })
 
-/** 步骤状态：'pending' | 'running' | 'done' */
-function stepStatus(index: number): 'pending' | 'running' | 'done' {
+/** 步骤状态：'pending' | 'running' | 'done' | 'error' */
+function stepStatus(index: number): 'pending' | 'running' | 'done' | 'error' {
+  // 数组下标 = step - 1
+  if (props.errorSteps?.includes(index + 1)) return 'error'
   if (index < props.currentStep) return 'done'
   if (index === props.currentStep) return 'running'
   return 'pending'
@@ -98,6 +102,11 @@ function stepStatus(index: number): 'pending' | 'running' | 'done' {
           <svg v-else-if="stepStatus(idx) === 'running'" class="pd-step__spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round">
             <path d="M12 2a10 10 0 1 0 9.95 8.95"/>
           </svg>
+          <!-- ✗ 失败 -->
+          <svg v-else-if="stepStatus(idx) === 'error'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
           <!-- ○ 待执行 -->
           <span v-else class="pd-step__dot"></span>
         </span>
@@ -106,6 +115,7 @@ function stepStatus(index: number): 'pending' | 'running' | 'done' {
         <span class="pd-step__status">
           <span v-if="stepStatus(idx) === 'done'" class="--done">已完成</span>
           <span v-else-if="stepStatus(idx) === 'running'" class="--run">进行中</span>
+          <span v-else-if="stepStatus(idx) === 'error'" class="--err">失败</span>
         </span>
       </div>
     </div>
@@ -225,6 +235,18 @@ function stepStatus(index: number): 'pending' | 'running' | 'done' {
   border-radius: 50%;
   border: 2px solid #cbd5e1;
   box-sizing: border-box;
+}
+
+/* ✗ 失败 — 红色 */
+.pd-step__icon.--error {
+  /* svg 自带红色，无需额外样式 */
+}
+/* 失败步骤的标签/状态文字标红 */
+.pd-step:has(.--error) .pd-step__label {
+  color: #ef4444;
+}
+.pd-step__status .--err {
+  color: #ef4444;
 }
 
 /* 步骤标签 */

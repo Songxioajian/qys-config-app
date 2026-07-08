@@ -77,6 +77,8 @@ const progressSteps = ref<StepItem[]>([
   { label: '配置 签署顺序 功能参数...' },
 ])
 const currentStepIndex = ref(0)
+/** 演示模式下失败（非致命）的步骤序号（1-based） */
+const errorSteps = ref<number[]>([])
 
 /** ===== 成功弹窗状态 ===== */
 const successVisible = ref(false)
@@ -239,6 +241,7 @@ async function onGenerate() {
   // 构建步骤列表并初始化进度弹窗
   progressSteps.value = buildStepList()
   currentStepIndex.value = 0
+  errorSteps.value = []
   progressVisible.value = true
   generating.value = true
 
@@ -253,9 +256,16 @@ async function onGenerate() {
         // 推进进度条到下一步（当前步骤完成，指向下一个）
         currentStepIndex.value = step
       },
-      onStepError: (step, key, resp, err) => {
+      onStepError: (step, key, resp, err, fatal) => {
         console.error(`步骤 ${step}（${key}）失败：`, { resp, err })
-        progressVisible.value = false
+        if (fatal) {
+          // 致命错误（创建流程 / 签署方失败）：关闭弹窗并提示
+          progressVisible.value = false
+        } else {
+          // 演示模式非致命错误（部分配置失败）：标记失败并继续后续配置
+          errorSteps.value = [...errorSteps.value, step]
+          currentStepIndex.value = step
+        }
       },
     })
 
@@ -263,6 +273,9 @@ async function onGenerate() {
     if (result.ok) {
       const cid = result.categoryId!
       json.meta.categoryId = cid
+      if (result.failedConfigs && result.failedConfigs.length > 0) {
+        ElMessage.warning(`流程已创建成功，但以下配置接口调用失败：${result.failedConfigs.join('、')}（演示模式：未阻断其他配置）`)
+      }
       showCreateSuccessDialog(cid)
     } else {
       ElMessage.error({ message: formatFlowError(result.error!), duration: 0, showClose: true })
@@ -304,7 +317,7 @@ function onGoInitiateFile() {
             </svg>
           </div>
           <div>
-            <h1 class="page-header__title">用印流程配置</h1>
+            <h1 class="page-header__title">签署流程智能生成</h1>
             <p class="page-header__sub">配置签署流程，一键生成提交</p>
           </div>
         </div>
@@ -435,6 +448,7 @@ function onGoInitiateFile() {
       :subtitle="progressSubtitle"
       :steps="progressSteps"
       :current-step="currentStepIndex"
+      :error-steps="errorSteps"
     />
 
     <!-- ===== 创建成功弹窗 ===== -->

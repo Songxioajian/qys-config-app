@@ -186,4 +186,6 @@ export interface FlowResult {
   categoryId?: number | string
   /** 失败时的错误信息 */
   error?: FlowError
+  /** 演示模式下：部分配置接口失败但未阻断流程时，记录失败的 key 列表 */
+  failedConfigs?: string[]
 }

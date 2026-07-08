@@ -9,7 +9,7 @@
  *   4. 已生效规则：统计 + 进度圆环 + 配置卡片网格(3列)
  */
 import { computed, ref, nextTick } from 'vue'
-import { Edit, Check, Close, Setting, ArrowRight, Calendar, Document as DocIcon, EditPen, Stamp, Camera, Lock } from '@element-plus/icons-vue'
+import { Edit, Check, Close, Setting, ArrowRight } from '@element-plus/icons-vue'
 import type { BusinessJson, ConfigItem } from '../../qys-config/types'
 import {
   CONFIG_KEY_LABEL,
@@ -61,17 +61,17 @@ const tabs = computed(() => {
   return items.length > 0 ? items : ['PDF电子签约', '预设', '顺序接收']
 })
 
-/** 签署方颜色 */
+/** 签署方配色：克制灰蓝 */
 const signColors = [
-  { bg: '#FDF2F0', border: '#F5C6C0', color: '#C45A3E' },
-  { bg: '#F5F3FE', border: '#D8D1F5', color: '#6B5DD3' },
-  { bg: '#EDF6DE', border: '#B8D992', color: '#4A8014' },
+  { bg: '#EEF3F9', border: '#D3E0EC', color: '#3F5E7C' },
+  { bg: '#F1F5F9', border: '#DCE5EE', color: '#46627E' },
+  { bg: '#EDF2F8', border: '#CFDDEA', color: '#5B7B9A' },
 ]
 
 /** 流程节点 */
 const flowNodes = computed(() => {
   const nodes: Array<{ label: string; bg: string; border: string; color: string }> = [
-    { label: '发起签暑', bg: '#EBF4FD', border: '#B3D9F5', color: '#1E7DC8' },
+    { label: '发起签暑', bg: '#E8F0F8', border: '#C5D8EC', color: '#33567A' },
   ]
   if (props.json.signatory.enable) {
     props.json.signatory.value.flowSignatories.forEach((s, i) => {
@@ -83,7 +83,7 @@ const flowNodes = computed(() => {
       })
     })
   }
-  nodes.push({ label: '归档', bg: '#F2F8EC', border: '#C5DBA8', color: '#5A9214' })
+  nodes.push({ label: '归档', bg: '#EFF3F8', border: '#D6E1EC', color: '#3F5E7C' })
   return nodes
 })
 
@@ -96,7 +96,6 @@ const enabledConfigs = computed(() =>
       label: CONFIG_KEY_LABEL[c.key] || c.key,
       valueText: formatValue(c),
       statusType: getStatus(c),
-      iconName: getIconName(c.key),
     }))
 )
 
@@ -107,7 +106,6 @@ const allConfigs = computed(() =>
     label: CONFIG_KEY_LABEL[c.key] || c.key,
     valueText: c.enable ? formatValue(c) : '未开启',
     statusType: getStatus(c),
-    iconName: getIconName(c.key),
   }))
 )
 
@@ -154,14 +152,6 @@ function getStatus(cfg: ConfigItem): string {
     default: return 'success'
   }
 }
-
-function getIconName(key: string): string {
-  const m: Record<string, string> = {
-    SIGN_EXPIRE_DATE: 'calendar', END_TIME: 'document', NEED_HANDWRITE_SEAL: 'pen',
-    PERSON_SEAL_CHECK: 'shield', ATTACHMENT_ID_CARD: 'camera', FDA_SIGN: 'lock',
-  }
-  return m[key] || 'default'
-}
 </script>
 
 <template>
@@ -193,7 +183,7 @@ function getIconName(key: string): string {
         <span class="fc__step" :style="{ background: node.bg, borderColor: node.border, color: node.color }">
           {{ node.label }}
         </span>
-        <ArrowRight v-if="i < flowNodes.length - 1" class="fc__arrow" />
+        <span v-if="i < flowNodes.length - 1" class="fc__arrow"></span>
       </template>
     </div>
 
@@ -217,14 +207,8 @@ function getIconName(key: string): string {
       <div class="fc__grid">
         <div v-for="c in displayCards" :key="c.key" class="fc__card" :class="{ 'fc__card--off': c.statusType === 'disabled' }">
           <div class="fc__card-l">
-            <span class="fc__card-icon" :class="'fc__ci--'+c.iconName">
-              <Calendar v-if="c.iconName==='calendar'" style="width:16px;height:16px;" />
-              <DocIcon v-else-if="c.iconName==='document'" style="width:16px;height:16px;" />
-              <EditPen v-else-if="c.iconName==='pen'" style="width:16px;height:16px;" />
-              <Stamp v-else-if="c.iconName==='shield'" style="width:16px;height:16px;" />
-              <Camera v-else-if="c.iconName==='camera'" style="width:16px;height:16px;" />
-              <Lock v-else-if="c.iconName==='lock'" style="width:16px;height:16px;" />
-              <Setting v-else style="width:16px;height:16px;" />
+            <span class="fc__card-icon fc__ci--default">
+              <Setting style="width:16px;height:16px;" />
             </span>
             <span class="fc__card-label">{{ c.label }}</span>
           </div>
@@ -279,16 +263,31 @@ function getIconName(key: string): string {
 
 /* ===== 2. 流程步骤 ===== */
 .fc__steps {
-  display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:wrap;
+  display:flex; align-items:center; justify-content:center; gap:0; flex-wrap:wrap;
 }
 .fc__step {
+  position:relative;
   display:inline-flex; align-items:center; justify-content:center;
-  min-width:110px; height:44px; padding:0 22px; border-radius:10px;
-  border:1.5px solid; font-size:15px; font-weight:500; white-space:nowrap;
-  transition:transform .15s;
+  min-width:108px; height:40px; padding:0 20px; border-radius:8px;
+  border:1px solid; font-size:14px; font-weight:600; letter-spacing:.3px; white-space:nowrap;
+  box-shadow:0 1px 2px rgba(60,90,120,.06);
+  transition:transform .15s, box-shadow .15s;
 }
-.fc__step:hover { transform:translateY(-1px); }
-.fc__arrow { width:22px; height:22px; color:#c8c8c8; flex-shrink:0; }
+.fc__step::before {
+  content:''; width:6px; height:6px; border-radius:50%;
+  background:currentColor; opacity:.85; margin-right:8px;
+}
+.fc__step:hover { transform:translateY(-1px); box-shadow:0 4px 10px rgba(60,90,120,.12); }
+.fc__arrow {
+  position:relative; width:34px; height:0; flex-shrink:0;
+  border-top:1.5px dashed #cdd7e0; margin:0 12px;
+}
+.fc__arrow::after {
+  content:''; position:absolute; right:-1px; top:50%;
+  width:6px; height:6px;
+  border-top:1.5px solid #cdd7e0; border-right:1.5px solid #cdd7e0;
+  transform:translateY(-50%) rotate(45deg);
+}
 
 /* ===== 3. 生效配置分隔线 ===== */
 .fc__divider {
@@ -340,22 +339,14 @@ function getIconName(key: string): string {
 .fc__card-icon {
   width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
 }
-.fc__ci--calendar { color:#2563eb; background:#e8f4fd; }
-.fc__ci--document { color:#52c41a; background:#f6ffed; }
-.fc__ci--pen { color:#fa541c; background:#fff2e8; }
-.fc__ci--shield { color:#722ed1; background:#f9f0ff; }
-.fc__ci--camera { color:#13c2c2; background:#e6fffb; }
-.fc__ci--lock { color:#999; background:#fafafa; }
+.fc__ci--default { color:#666; background:#f5f5f5; }
 .fc__card-label { font-size:14px; color:#333; }
 
 /* 状态标签 */
 .fc__card-tag {
   padding:3px 10px; font-size:12px; font-weight:500; border-radius:4px; white-space:nowrap;
 }
-.fc__tag--success { color:#389e0d; background:#f6ffed; border:1px solid #b7eb8f; }
-.fc__tag--days { color:#096dd9; background:#e6f7ff; border:1px solid #91d5ff; }
-.fc__tag--warning { color:#d46b08; background:#fffbe6; border:1px solid #ffe58f; }
-.fc__tag--disabled { color:#bfbfbf; background:#fafafa; border:1px solid #f0f0f0; }
+.fc__card-tag { color:#096dd9; background:#e6f7ff; border:1px solid #91d5ff; }
 
 /* 查看全部 */
 .fc__more {
