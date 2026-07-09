@@ -46,18 +46,20 @@ const API_TIMEOUT = 15000
 /** 跳转「去发起文件」页面的路径（拼接在 API_BASE_URL 之后，可手动修改） */
 const INITIATE_FILE_PATH = '/launch/contract'
 /** ★ 默认 token：请手动替换为真实有效的 token */
-const INITIATE_FILE_TOKEN = ''
+const INITIATE_FILE_TOKEN = 'siLtVqtS3%2BoNtWUTdXTH5Q%3D%3D'
 /** token 查询参数名（一般固定，按需修改） */
-const INITIATE_FILE_TOKEN_KEY = ''
+const INITIATE_FILE_TOKEN_KEY = 'pocToken'
 
 /**
  * 构建「去发起文件」跳转地址（新页面 URL）
  * 格式：{API_BASE_URL}{INITIATE_FILE_PATH}?categoryId={cid}&{tokenKey}={token}
  */
 export function buildInitiateFileUrl(categoryId: number | string): string {
+  // INITIATE_FILE_TOKEN 已是 URL 编码值（如 %2B、%3D），先解码再交给
+  // URLSearchParams 统一编码，避免 % 被二次编码成 %25
   const params = new URLSearchParams()
   params.set('categoryId', String(categoryId))
-  params.set(INITIATE_FILE_TOKEN_KEY, INITIATE_FILE_TOKEN)
+  params.set(INITIATE_FILE_TOKEN_KEY, decodeURIComponent(INITIATE_FILE_TOKEN))
   return `${API_BASE_URL}${INITIATE_FILE_PATH}?${params.toString()}`
 }
 
