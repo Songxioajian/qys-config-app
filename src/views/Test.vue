@@ -47,6 +47,19 @@ function generateDefaultCategoryName(): string {
   return `AI智能用印流_${ts}${rand}`
 }
 
+/**
+ * 给名称追加时间戳，避免同名重复（接口不允许 categoryName 重复）
+ * 仅当名称非空时追加；传入空串则返回原值由调用方兜底生成默认名
+ */
+function appendTimestamp(name: string): string {
+  if (!name || !name.trim()) return name
+  const now = new Date()
+  const pad = (n: number) => String(n).padStart(2, '0')
+  const ts = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}` +
+    `${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`
+  return `${name}_${ts}`
+}
+
 /** ★ 单一数据源：业务 JSON（页面打开即填入默认流程名称） */
 const json = reactive<BusinessJson>(createEmptyBusinessJson())
 json.meta.categoryName = generateDefaultCategoryName()
@@ -141,6 +154,8 @@ function loadFromHash() {
     if (!json.meta.employeeId || !String(json.meta.employeeId).trim()) {
       json.meta.employeeId = preservedEmployeeId
     }
+    // 导入的 categoryName 可能已存在，追加时间戳避免重名
+    json.meta.categoryName = appendTimestamp(json.meta.categoryName)
     Object.assign(json.signatory, result.data.signatory)
     json.configs.splice(0, json.configs.length, ...result.data.configs)
     ElMessage.success('已从 URL hash 导入配置')
@@ -188,6 +203,8 @@ function onConfirmImport() {
     if (!json.meta.employeeId || !String(json.meta.employeeId).trim()) {
       json.meta.employeeId = preservedEmployeeId
     }
+    // 导入的 categoryName 可能已存在，追加时间戳避免重名
+    json.meta.categoryName = appendTimestamp(json.meta.categoryName)
     Object.assign(json.signatory, result.data.signatory)
     json.configs.splice(0, json.configs.length, ...result.data.configs)
     importVisible.value = false

@@ -121,11 +121,15 @@ function getResponseSignatories(resp: ApiResponse): any[] | undefined {
 }
 
 /**
- * 附件证件照校验（ATTACHMENT_ID_CARD）配置 value 处理：
+ * 需引用「修改签署方」返回 PERSONAL 实际 flag 的配置项 value 处理：
  * 将 flowSignatories[].flowSignatoryFlag 替换为「修改签署方」返回的 PERSONAL 实际 flag。
  * 接口不允许使用前端占位 flag，必须引用后端实际生成的 signatoryFlag。
+ *
+ * 适用配置项：
+ *   - 附件证件照校验（ATTACHMENT_ID_CARD）
+ *   - 个人签名笔迹校验（PERSON_SEAL_CHECK）
  */
-function resolveAttachmentIdCardValue(value: any, personalFlag: string): any {
+function resolvePersonalFlagValue(value: any, personalFlag: string): any {
   if (!value || !Array.isArray(value.flowSignatories)) return value
   return {
     ...value,
@@ -310,8 +314,8 @@ export async function runFlow(
     if (!item.enable) continue
 
     const reqItem =
-      item.key === 'ATTACHMENT_ID_CARD' && personalSignatoryFlag
-        ? { ...item, value: resolveAttachmentIdCardValue(item.value, personalSignatoryFlag) }
+      (item.key === 'ATTACHMENT_ID_CARD' || item.key === 'PERSON_SEAL_CHECK') && personalSignatoryFlag
+        ? { ...item, value: resolvePersonalFlagValue(item.value, personalSignatoryFlag) }
         : item
     const req = buildConfigRequest(json.meta, categoryId, reqItem)
     options?.onStepStart?.(currentStep, item.key, req)

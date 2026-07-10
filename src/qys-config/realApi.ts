@@ -44,7 +44,7 @@ const API_TIMEOUT = 15000
 //    目标新页面地址 = API_BASE_URL + INITIATE_FILE_PATH + 查询参数(categoryId & token)
 // ============================================================
 /** 跳转「去发起文件」页面的路径（拼接在 API_BASE_URL 之后，可手动修改） */
-const INITIATE_FILE_PATH = '/launch/contract'
+const INITIATE_FILE_PATH = '/setting/workflow/file'
 /** ★ 默认 token：请手动替换为真实有效的 token */
 const INITIATE_FILE_TOKEN = 'siLtVqtS3%2BoNtWUTdXTH5Q%3D%3D'
 /** token 查询参数名（一般固定，按需修改） */
